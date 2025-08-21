@@ -1,0 +1,4 @@
+camel-ai
+yfinance
+camel-ai[tools]
+tavily-pythona
