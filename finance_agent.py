@@ -15,7 +15,19 @@ from camel.models import ModelFactory
 from camel.societies.workforce import Workforce
 from camel.tasks import Task
 from camel.types import RoleType
+from tavily import TavilyClient
+from openai import OpenAI
+import os
 
+os.environ["TAVILY_API_KEY"] = "dummy key"
+os.environ["OPENAI_API_KEY"] = "dummy key"
+
+tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+def tavily_search_tool(query: str):
+    """Search the internet using Tavily API."""
+    search_results = tavily_client.search(query=query, search_depth="advanced", include_images=False)
+    return search_results
 
 def get_current_stock_price(ticker: str) -> str:
     """Get current stock price and basic info."""
