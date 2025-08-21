@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from tools import TavilySearchTool
 from camel.toolkits.function_tool import FunctionTool
 from camel.agents import ChatAgent
+from camel.toolkits import MathToolkit
 from camel.messages import BaseMessage
 from camel.models import ModelFactory
 from camel.societies.workforce import Workforce
@@ -341,7 +342,27 @@ def multi_agent_with_verifier(input_question: str, include_stdout: bool = True) 
         ),
         tools=stock_tools,
     )
-
+    math_tools = MathToolkit().get_tools()
+    math_agent = ChatAgent(
+        system_message = BaseMessage.make_assistant_message(
+            role_name="Math Agent",
+            content="""
+                You are a math agent.
+                You calculate the answer to the question using the tools provided.
+                You have access to the following tools:
+                math_add: Add two numbers
+                math_subtract: Subtract two numbers
+                math_multiply: Multiply two numbers
+                math_divide: Divide two numbers
+                math_round: Round a number to a specified decimal place
+            """,
+        ),
+        model = ModelFactory.create(
+            model_platform="openai",  
+            model_type="gpt-4o",   
+        ),
+        tools=math_tools,
+    )
 
     coordinator = ChatAgent(
         system_message = BaseMessage.make_assistant_message(
@@ -378,6 +399,9 @@ def multi_agent_with_verifier(input_question: str, include_stdout: bool = True) 
     ).add_single_agent_worker(
         description = "worker agent for stock information",
         worker = stock_agent,
+    ).add_single_agent_worker(
+        description = "worker agent for math calculations",
+        worker = math_agent,
     )
 
     task = Task(
